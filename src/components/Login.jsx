@@ -10,12 +10,40 @@ export default function Login({ setCurrentPage }) {
     password: '',
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Login submitted:', formData);
-    alert('Login successful! Welcome back to PawsAdopt.');
-    if (typeof setCurrentPage === 'function') setCurrentPage('dashboard');
-  };
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  try {
+    // 1️⃣ Send login request to backend
+    const res = await fetch("http://localhost:5000/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        email: formData.email,
+        password: formData.password,
+      }),
+    });
+
+    // 2️⃣ Convert backend response to JSON
+    const data = await res.json();
+
+    // 3️⃣ Check if login is successful
+    if (res.ok) {
+      alert(`Login successful! Welcome back, ${data.user?.name || "PawsAdopt user"} 🐾`);
+      console.log("Login success:", data);
+
+      localStorage.setItem("token", data.token);
+
+      if (typeof setCurrentPage === "function") setCurrentPage("dashboard");
+    } else {
+      alert(data.message || "Invalid email or password!");
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    alert("Something went wrong. Please try again later.");
+  }
+};
+
 
   const handleChange = (e) => {
     setFormData({

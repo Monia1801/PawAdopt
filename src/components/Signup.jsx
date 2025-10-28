@@ -15,15 +15,42 @@ export default function Signup({ setCurrentPage }) {
     userType: '',
   });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
-      return;
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+
+  if (formData.password !== formData.confirmPassword) {
+    alert("Passwords do not match!");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:5000/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        password: formData.password,
+      }),
+    });
+
+    // 3️⃣ Convert response to JSON
+    const data = await res.json();
+
+    // 4️⃣ Handle success or error
+    if (res.ok) {
+      alert(`Account created successfully! Welcome to PawsAdopt, ${formData.name}!`);
+      console.log("Signup success:", data);
+
+    } else {
+      alert(data.message || "Signup failed! Please try again.");
     }
-    console.log('Signup submitted:', formData);
-    alert(`Account created successfully! Welcome to PawsAdopt, ${formData.name}!`);
-  };
+  } catch (err) {
+    console.error("Error:", err);
+    alert("Something went wrong. Please try again later.");
+  }
+};
+
 
   const handleChange = (e) => {
     setFormData({
